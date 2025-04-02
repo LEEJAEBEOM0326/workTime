@@ -116,6 +116,14 @@
             margin-top: 20px;
             text-align: center;
         }
+        .result-txt {
+            border-radius: 5px;
+            background: #a3c9f1;
+            padding: 4px 8px;
+        }
+        .result-txt strong {
+            color: #fa5757;
+        }
     </style>
 </head>
 <body>
@@ -219,6 +227,21 @@
         ctx.fillStyle = '#4CAF50';
         ctx.fill();
 
+        // 연한 초록색 배경 그리기 (빨간 아크와 겹치지 않도록)
+        if (workedPercentage < 100) {
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, workedEndAngle - Math.PI / 2, 2 * Math.PI - Math.PI / 2);
+            ctx.lineTo(0, 0);
+            ctx.fillStyle = 'rgba(76, 175, 80, 0.2)'; // 연한 초록색 (20% 투명도)
+            ctx.fill();
+        }
+
+        // 연한 빨강색 배경 그리기
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.8, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(248, 75, 75, 0.2)'; // 연한 빨강색 (20% 투명도)
+        ctx.fill();
+
         // 남은 시간 아크 그리기
         const remainingEndAngle = (remainingPercentage / 100) * 2 * Math.PI;
         ctx.beginPath();
@@ -232,13 +255,6 @@
         ctx.arc(0, 0, radius * 0.1, 0, 2 * Math.PI);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
-
-        // 남은 시간 텍스트 추가 (위치 조정)
-        ctx.font = '16px Arial';
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(remainingTimeStr, 0, radius * 0.3); // y 좌표를 radius * 0.3로 변경
 
         ctx.restore(); // 저장된 상태 복원
     }
@@ -287,19 +303,33 @@
             const endTimeStr = `${period} ${formattedHours}시 ${minutes}분`;
 
             const remainingTime = (endDateTime - now) / (1000 * 60 * 60);
-            const remainingTimeStr = formatTime(remainingTime);
+            let remainingTimeStr;
+            let remainingWorkPercentage;
 
-            const remainingWorkPercentage = Math.round((remainingHours / targetTotal) * 100);
-            const remainingLeavePercentage = Math.round((remainingTime / 9) * 100); // 9시간 기준
+            if (remainingTime < 0) {
+                remainingTimeStr = '8시간 초과근무 중';
+                remainingWorkPercentage = 100;
+            } else {
+                remainingTimeStr = formatTime(remainingTime);
+                const totalWorkDayHours = 9; // 총 근무 시간 (9시간)
+                const todayWorkedHours = totalWorkDayHours - remainingTime;
+                remainingWorkPercentage = Math.round((todayWorkedHours / totalWorkDayHours) * 100);
+            }
+
+            const remainingLeavePercentage = Math.min(Math.round((totalWorkedHours / targetTotal) * 100), 100);
 
             const resultDiv = document.querySelector('.result');
             const resultWrap = document.getElementById('resultWrap');
+
+            const totalWorkedHoursText = remainingLeavePercentage >= 100 ? '근무시간 초과' : `${formatTime(totalWorkedHours)}`;
+
             resultDiv.innerHTML = `
-                <h3>근무시간 계산 결과</h3>
-                <p>오늘 근무시간: ${formatTime(todayHours)}</p>
-                <p class="highlight">총 근무시간: <em class="highlight-point">${formatTime(totalWorkedHours)}</em>  / ${targetHours}시간<span class="progress-bar" style="width: ${remainingLeavePercentage}%;"></span></p>
-                <p class="highlight highlight-background">남은 퇴근 시간: <em class="highlight-point">${remainingTimeStr}</em> / ${endTimeStr} <span class="progress-bar" style="width: ${remainingWorkPercentage}%;"></span></p>
-            `;
+            <h3>근무시간 계산 결과</h3>
+            <p class="highlight">총 근무시간: <em class="highlight-point">${totalWorkedHoursText}</em>  / ${targetHours}시간<span class="progress-bar" style="width: ${remainingLeavePercentage}%;"></span></p>
+            <p class="highlight highlight-background">오늘 근무시간: <em class="highlight-point">${formatTime(todayHours)}</em> / 8시간 <span class="progress-bar" style="width: ${remainingWorkPercentage}%;"></span></p>
+            <p class="result-txt">퇴근시간은 <strong>${endTimeStr}</strong>입니다. <br>
+            앞으로 <strong>${remainingTimeStr}</strong> 남았습니다.</p>
+        `;
             resultWrap.classList.add('active');
 
             saveInputValues();
@@ -312,6 +342,7 @@
             alert('올바른 숫자를 입력해주세요.');
         }
     }
+
 
     document.addEventListener('DOMContentLoaded', loadSavedValues);
 </script>

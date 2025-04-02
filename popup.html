@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무시간 계산기</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        .container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .time-input {
+            padding: 10px;
+            width: calc(20% - 10px);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .time-unit {
+            display: inline-block;
+            text-align: center;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #resultWrap {
+            display: none;
+        }
+
+        #resultWrap.active {
+            display: block;
+        }
+
+        .result {
+            margin-top: 20px;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f0f0f0;
+        }
+
+        .result > p {
+            position: relative;
+            z-index: 1;
+        }
+        .result > p.highlight {
+            color: #000000;
+            padding: 0 4px;
+            background: #a3e4a5;
+            border-radius: 5px;
+        }
+
+        .highlight-point {
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 5px;
+            box-sizing: border-box;
+            z-index: -1;
+        }
+
+        .highlight-background {
+            background-color: #f2cfcf !important; /* f84b4b 색상의 20% 투명도 */
+        }
+
+        .highlight-background span {
+            background: #f84b4b !important;
+        }
+
+        #startTime {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .chart-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .result-txt {
+            border-radius: 5px;
+            background: #a3c9f1;
+            padding: 4px 8px;
+        }
+        .result-txt strong {
+            color: #fa5757;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="input-group">
+        <label>이번달 목표 근무시간:</label>
+        <input type="number" id="targetHours" min="0" class="time-input" placeholder="시간">
+        <span class="time-unit">시</span>
+        <input type="number" id="targetMinutes" min="0" max="59" class="time-input" placeholder="분">
+        <span class="time-unit">분</span>
+    </div>
+
+    <div class="input-group">
+        <label>현재까지 근무한 시간:</label>
+        <input type="number" id="workedHours" min="0" class="time-input" placeholder="시간">
+        <span class="time-unit">시</span>
+        <input type="number" id="workedMinutes" min="0" max="59" class="time-input" placeholder="분">
+        <span class="time-unit">분</span>
+    </div>
+
+    <div class="input-group">
+        <label>오늘 출근 시간:</label>
+        <input type="time" id="startTime">
+    </div>
+
+    <button id="calculateButton">계산하기</button>
+
+    <div id="resultWrap">
+        <div class="result"></div>
+        <div class="chart-container">
+            <canvas id="workHoursClock" width="200" height="200"></canvas>
+        </div>
+    </div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
